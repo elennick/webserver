@@ -1,5 +1,7 @@
 package com.evanlennick.webserver;
 
+import java.io.IOException;
+
 public class Main {
 
     public static final int DEFAULT_PORT = 8180;
@@ -10,7 +12,11 @@ public class Main {
         Runnable runnable = new Runnable() {
             public void run() {
                 Server server = new Server(port);
-                server.start();
+                try {
+                    server.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         };
         runnable.run();

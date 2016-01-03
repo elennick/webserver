@@ -18,18 +18,11 @@ public class Client {
     }
 
     public void handleRequest() throws IOException {
-        System.out.println("*** REQUEST:");
-        System.out.println(socket + "\n");
+        long start = System.currentTimeMillis();
 
-        InputStreamReader isr = new InputStreamReader(socket.getInputStream());
-        BufferedReader reader = new BufferedReader(isr);
-        String line = reader.readLine();
-
-        while (!line.isEmpty()) {
-            System.out.println(line);
-            line = reader.readLine();
-        }
-        System.out.println();
+        String requestString = readRequest(socket);
+        HttpRequest request = new HttpRequest(requestString);
+        System.out.println("request = " + request);
 
         String response = "\\\n" +
                 "HTTP/1.1 200 OK\n" +
@@ -37,14 +30,32 @@ public class Client {
                 "Content-Type: text/html; charset=utf-8\n" +
                 "Server: elennick-webserver\n" +
                 "\n" +
-                "<html><title>Test Title!</title><body>Test Body!</body></html>\n";
+                "<html><title>Test Title!</title><body>Test Body!</body></html>";
 
-        writeResponse(response, socket);
+        writeResponse(socket, response);
 
         socket.close();
+
+        long stop = System.currentTimeMillis();
+        long elapsed = stop - start;
+        System.out.println("Request took " + elapsed + "ms\n\n");
     }
 
-    private void writeResponse(String response, Socket socket) throws IOException {
+    private String readRequest(Socket socket) throws IOException {
+        InputStreamReader isr = new InputStreamReader(socket.getInputStream());
+        BufferedReader reader = new BufferedReader(isr);
+
+        String line = reader.readLine();
+        StringBuffer request = new StringBuffer(line + "\n");
+        while (!line.isEmpty()) {
+            line = reader.readLine();
+            request.append(line + "\n");
+        }
+
+        return request.toString();
+    }
+
+    private void writeResponse(Socket socket, String response) throws IOException {
         OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(), "UTF-8");
         osw.write(response, 0, response.length());
         osw.flush();
