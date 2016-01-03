@@ -1,9 +1,6 @@
 package com.evanlennick.webserver;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.Socket;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -24,15 +21,7 @@ public class Client {
         HttpRequest request = new HttpRequest(requestString);
         System.out.println("request = " + request);
 
-        String response = "\\\n" +
-                "HTTP/1.1 200 OK\n" +
-                "Date: " + getRfc1123FormattedDateTime() + "\n" +
-                "Content-Type: text/html; charset=utf-8\n" +
-                "Server: elennick-webserver\n" +
-                "\n" +
-                "<html><title>Test Title!</title><body>Test Body!</body></html>";
-
-        writeResponse(socket, response);
+        writeResponse(socket, request);
 
         socket.close();
 
@@ -55,13 +44,46 @@ public class Client {
         return request.toString();
     }
 
-    private void writeResponse(Socket socket, String response) throws IOException {
+    private void writeResponse(Socket socket, HttpRequest request) throws IOException {
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = null;
+        String statusLine;
+        boolean isOk;
+        try {
+            String fileLocation = "www/" + request.getResource();
+            file = new File(classLoader.getResource(fileLocation).getFile());
+            isOk = true;
+            statusLine = "HTTP/1.1 200 OK";
+        } catch(NullPointerException e) {
+            isOk = false;
+            statusLine = "HTTP/1.1 404 Not Found";
+        }
+
+        String responseHeader = "\\\n" +
+                statusLine + "\n" +
+                "Date: " + getRfc1123FormattedDateTime() + "\n" +
+                "Content-Type: text/html; charset=utf-8\n" +
+                "Server: elennick-webserver\n" +
+                "\n";
+
         OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(), "UTF-8");
-        osw.write(response, 0, response.length());
-        osw.flush();
+        osw.write(responseHeader, 0, responseHeader.length());
+
+        if(isOk) {
+            byte[] mybytearray = new byte[(int) file.length()];
+            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+            bis.read(mybytearray, 0, mybytearray.length);
+            OutputStream os = socket.getOutputStream();
+            os.write(mybytearray, 0, mybytearray.length);
+            os.flush();
+        } else {
+            osw.flush();
+        }
+
+//        socket.getOutputStream().flush();
 
         System.out.println("*** RESPONSE:");
-        System.out.println(response);
+        System.out.println(responseHeader);
         System.out.println();
     }
 
