@@ -38,9 +38,9 @@ public class Server {
             synchronized (this) {
                 pool.execute(new Runnable() {
                     public void run() {
-                        Client client = new Client(socket);
+                        RequestHandler requestHandler = new RequestHandler(socket);
                         try {
-                            client.handleRequest();
+                            requestHandler.go();
                         } catch (IOException e) {
                             System.out.println("Error encountered during request: " + e.getMessage());
                             e.printStackTrace();

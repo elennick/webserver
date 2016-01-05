@@ -9,17 +9,17 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    String requestLine;
+    private String requestLine;
 
-    String method;
+    private String method;
 
-    String resource;
+    private String resource;
 
-    String version;
+    private String version;
 
-    Map<String, String> headers;
+    private Map<String, String> headers;
 
-    String body;
+    private String body;
 
     public HttpRequest(String request) throws IOException {
         headers = Maps.newHashMap();
