@@ -4,7 +4,9 @@ public enum HttpResponseCode {
 
     OK(200, "OK"),
 
-    NOT_FOUND(404, "Not Found");
+    NOT_FOUND(404, "Not Found"),
+
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
     private int statusCode;
 

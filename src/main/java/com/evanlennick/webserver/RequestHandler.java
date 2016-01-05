@@ -29,7 +29,18 @@ public class RequestHandler {
         HttpRequest request = new HttpRequest(requestString);
         System.out.println("request = " + request);
 
-        writeResponse(socket, request);
+        HttpResponse response;
+        try {
+            response = generateResponse(socket, request);
+        } catch (Exception e) {
+            response = new HttpResponseBuilder()
+                    .code(HttpResponseCode.INTERNAL_SERVER_ERROR)
+                    .addHeader("Date", getRfc1123FormattedDateTime())
+                    .addHeader("Server", "elennick-webserver")
+                    .build();
+        }
+        System.out.println("response = " + response);
+        writeResponse(response);
 
         socket.close();
 
@@ -52,7 +63,7 @@ public class RequestHandler {
         return request.toString();
     }
 
-    private void writeResponse(Socket socket, HttpRequest request) throws IOException {
+    private HttpResponse generateResponse(Socket socket, HttpRequest request) throws IOException {
         String fileLocation = "www/" + request.getResource();
 
         ClassLoader classLoader = getClass().getClassLoader();
@@ -84,19 +95,18 @@ public class RequestHandler {
                 .addHeader("Server", "elennick-webserver")
                 .body(body);
 
-        if(null != contentType) {
+        if (null != contentType) {
             responseBuilder.addHeader("Content-Type", contentType);
         }
-        HttpResponse response =  responseBuilder.build();
 
-        System.out.println("response = " + response);
+        return responseBuilder.build();
+    }
 
+    private void writeResponse(HttpResponse response) throws IOException {
         byte[] responseByteArray = response.getResponseAsBytes();
         OutputStream os = socket.getOutputStream();
         os.write(responseByteArray, 0, responseByteArray.length);
-
         os.flush();
-//        socket.getOutputStream().flush();
     }
 
     private String getRfc1123FormattedDateTime() {

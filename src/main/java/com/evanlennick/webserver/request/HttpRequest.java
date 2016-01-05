@@ -82,7 +82,6 @@ public class HttpRequest {
                 ", resource='" + resource + '\'' +
                 ", version='" + version + '\'' +
                 ", headers=" + headers +
-                ", body='" + body + '\'' +
                 '}';
     }
 }
