@@ -1,5 +1,6 @@
 package com.evanlennick.webserver;
 
+import com.evanlennick.webserver.mimetypes.MimeType;
 import com.evanlennick.webserver.mimetypes.MimeTypeUtil;
 import com.evanlennick.webserver.request.HttpRequest;
 import com.evanlennick.webserver.response.HttpResponse;
@@ -58,7 +59,7 @@ public class RequestHandler {
         String resource;
         byte[] body = null;
         HttpResponseCode code;
-        String contentType = null;
+        String contentType;
 
         try {
             resource = classLoader.getResource(fileLocation).getFile();
@@ -74,6 +75,7 @@ public class RequestHandler {
             bis.read(body, 0, body.length);
         } catch (NullPointerException e) {
             code = HttpResponseCode.NOT_FOUND;
+            contentType = MimeType.TEXT_PLAIN.getMimeTypeString();
         }
 
         HttpResponseBuilder responseBuilder = new HttpResponseBuilder()
