@@ -1,5 +1,12 @@
 package com.evanlennick.webserver;
 
+import com.evanlennick.webserver.mimetypes.MimeTypeUtil;
+import com.evanlennick.webserver.request.HttpRequest;
+import com.evanlennick.webserver.response.HttpResponse;
+import com.evanlennick.webserver.response.HttpResponseBuilder;
+import com.evanlennick.webserver.response.HttpResponseCode;
+import com.google.common.io.Files;
+
 import java.io.*;
 import java.net.Socket;
 import java.time.ZoneId;
@@ -59,11 +66,8 @@ public class RequestHandler {
 
             code = HttpResponseCode.OK;
 
-            if(resource.endsWith(".html")) {
-                contentType = "text/html; charset=utf-8";
-            } else if(resource.endsWith(".png")) {
-                contentType = "image/png";
-            }
+            String fileExtension = Files.getFileExtension(resource);
+            contentType = MimeTypeUtil.getMimeTypeStringByFileExtension(fileExtension);
 
             body = new byte[(int) file.length()];
             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));

@@ -1,10 +1,8 @@
-package com.evanlennick.webserver;
+package com.evanlennick.webserver.response;
 
-import com.google.common.collect.ObjectArrays;
 import com.google.common.primitives.Bytes;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 
@@ -38,7 +36,7 @@ public class HttpResponse {
 
         byte[] headerAsBytes = header.toString().getBytes(StandardCharsets.UTF_8);
 
-        if(Objects.nonNull(body)) {
+        if (Objects.nonNull(body)) {
             return Bytes.concat(headerAsBytes, body);
         } else {
             return headerAsBytes;

@@ -1,4 +1,4 @@
-package com.evanlennick.webserver;
+package com.evanlennick.webserver.response;
 
 public enum HttpResponseCode {
 

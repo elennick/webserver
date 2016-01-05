@@ -1,4 +1,4 @@
-package com.evanlennick.webserver;
+package com.evanlennick.webserver.request;
 
 import com.google.common.collect.Maps;
 
