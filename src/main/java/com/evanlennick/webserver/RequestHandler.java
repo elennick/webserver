@@ -31,7 +31,7 @@ public class RequestHandler {
 
         HttpResponse response;
         try {
-            response = generateResponse(socket, request);
+            response = generateResponse(request);
         } catch (Exception e) {
             response = new HttpResponseBuilder()
                     .code(HttpResponseCode.INTERNAL_SERVER_ERROR)
@@ -63,7 +63,7 @@ public class RequestHandler {
         return request.toString();
     }
 
-    private HttpResponse generateResponse(Socket socket, HttpRequest request) throws IOException {
+    private HttpResponse generateResponse(HttpRequest request) throws IOException {
         String fileLocation = "www/" + request.getResource();
 
         ClassLoader classLoader = getClass().getClassLoader();
