@@ -1,5 +1,7 @@
 package com.evanlennick.webserver.response;
 
+import com.evanlennick.webserver.Utils;
+import com.google.common.collect.Maps;
 import com.google.common.primitives.Bytes;
 
 import java.nio.charset.StandardCharsets;
@@ -10,6 +12,8 @@ public class HttpResponse {
 
     public static final String HTTP_EOL = "\r\n";
 
+    public static final String SERVER_STRING = "elennick-webserver";
+
     private String version;
 
     private HttpResponseCode code;
@@ -18,13 +22,14 @@ public class HttpResponse {
 
     private byte[] body;
 
-    public HttpResponse() {}
-
     public HttpResponse(HttpResponseCode code, Map<String, String> headers, byte[] body) {
         this.version = "HTTP/1.1";
         this.code = code;
         this.headers = headers;
         this.body = body;
+
+        addHeader("Date", Utils.getRfc1123FormattedDateTime());
+        addHeader("Server", SERVER_STRING);
     }
 
     public byte[] getResponseAsBytes() {
@@ -60,6 +65,14 @@ public class HttpResponse {
             headersInHttpFormat.append(HTTP_EOL);
         }
         return headersInHttpFormat.toString();
+    }
+
+    public void addHeader(String headerFieldName, String headerValue) {
+        if (null == headers) {
+            headers = Maps.newHashMap();
+        }
+
+        headers.put(headerFieldName, headerValue);
     }
 
     public void setHeaders(Map<String, String> headers) {

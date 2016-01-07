@@ -3,6 +3,7 @@ package com.evanlennick.webserver;
 import com.evanlennick.webserver.mimetypes.MimeType;
 import com.evanlennick.webserver.mimetypes.MimeTypeUtil;
 import com.evanlennick.webserver.request.HttpRequest;
+import com.evanlennick.webserver.request.HttpRequestMethod;
 import com.evanlennick.webserver.response.HttpResponse;
 import com.evanlennick.webserver.response.HttpResponseBuilder;
 import com.evanlennick.webserver.response.HttpResponseCode;
@@ -10,9 +11,6 @@ import com.google.common.io.Files;
 
 import java.io.*;
 import java.net.Socket;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class RequestHandler {
 
@@ -31,12 +29,18 @@ public class RequestHandler {
 
         HttpResponse response;
         try {
-            response = generateResponse(request);
+            if (request.getMethod().equals(HttpRequestMethod.GET.name())
+                    || request.getMethod().equals(HttpRequestMethod.HEAD.name())) {
+                response = generateGetOrHeadResponse(request);
+            } else if (request.getMethod().equals((HttpRequestMethod.DELETE.name()))) {
+                response = generateDeleteResponse(request);
+            } else {
+                throw new UnsupportedOperationException();
+            }
         } catch (Exception e) {
+            e.printStackTrace();
             response = new HttpResponseBuilder()
                     .code(HttpResponseCode.INTERNAL_SERVER_ERROR)
-                    .addHeader("Date", getRfc1123FormattedDateTime())
-                    .addHeader("Server", "elennick-webserver")
                     .build();
         }
         System.out.println("response = " + response);
@@ -63,34 +67,30 @@ public class RequestHandler {
         return request.toString();
     }
 
-    private HttpResponse generateResponse(HttpRequest request) throws IOException {
+    private HttpResponse generateGetOrHeadResponse(HttpRequest request) throws IOException {
         String fileLocation = "www/" + request.getResource();
 
         ClassLoader classLoader = getClass().getClassLoader();
-        String resource;
+        String locationRequested;
         byte[] body = null;
         HttpResponseCode code;
         String contentType;
 
         try {
-            resource = classLoader.getResource(fileLocation).getFile();
-            File file = new File(resource);
-
-            if (file.isDirectory()) {
-                File indexFile = new File(file, "index.html");
-                if (indexFile.exists() && !indexFile.isDirectory()) {
-                    file = indexFile;
-                }
-            }
+            locationRequested = classLoader.getResource(fileLocation).getFile();
+            File file = determineResourceToReturn(locationRequested);
 
             code = HttpResponseCode.OK;
 
-            String fileExtension = Files.getFileExtension(resource);
+            String fileExtension = Files.getFileExtension(locationRequested);
             contentType = MimeTypeUtil.getMimeTypeStringByFileExtension(fileExtension);
 
-            body = new byte[(int) file.length()];
-            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-            bis.read(body, 0, body.length);
+            String requestMethod = request.getMethod();
+            if (requestMethod.equals(HttpRequestMethod.GET.name())) {
+                body = new byte[(int) file.length()];
+                BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+                bis.read(body, 0, body.length);
+            }
         } catch (NullPointerException e) {
             code = HttpResponseCode.NOT_FOUND;
             contentType = MimeType.TEXT_PLAIN.getMimeTypeString();
@@ -98,8 +98,6 @@ public class RequestHandler {
 
         HttpResponseBuilder responseBuilder = new HttpResponseBuilder()
                 .code(code)
-                .addHeader("Date", getRfc1123FormattedDateTime())
-                .addHeader("Server", "elennick-webserver")
                 .body(body);
 
         if (null != contentType) {
@@ -109,16 +107,30 @@ public class RequestHandler {
         return responseBuilder.build();
     }
 
+    private HttpResponse generateDeleteResponse(HttpRequest request) {
+        return new HttpResponseBuilder()
+                .code(HttpResponseCode.ACCEPTED)
+                .build();
+    }
+
+    private File determineResourceToReturn(String locationRequested) {
+        File file = new File(locationRequested);
+
+        if (file.isDirectory()) {
+            File indexFile = new File(file, "index.html");
+            if (indexFile.exists() && !indexFile.isDirectory()) {
+                file = indexFile;
+            }
+        }
+
+        return file;
+    }
+
     private void writeResponse(HttpResponse response) throws IOException {
         byte[] responseByteArray = response.getResponseAsBytes();
         OutputStream os = socket.getOutputStream();
         os.write(responseByteArray, 0, responseByteArray.length);
         os.flush();
-    }
-
-    private String getRfc1123FormattedDateTime() {
-        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("GMT"));
-        return DateTimeFormatter.RFC_1123_DATE_TIME.format(now);
     }
 
 }
