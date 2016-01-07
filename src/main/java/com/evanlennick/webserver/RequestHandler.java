@@ -94,11 +94,8 @@ public class RequestHandler {
 
         HttpResponseBuilder responseBuilder = new HttpResponseBuilder()
                 .code(code)
+                .addHeader("Content-Type", contentType)
                 .body(body);
-
-        if (null != contentType) {
-            responseBuilder.addHeader("Content-Type", contentType);
-        }
 
         if(request.isHeadRequest()) {
             responseBuilder.dontIncludeBody();

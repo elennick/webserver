@@ -9,6 +9,8 @@ public enum MimeType {
 
     IMG_JPG("image/jpeg", Arrays.asList("jpg", "jpeg", "jpe", "jfif", "jfif-tbnl")),
 
+    IMG_ICO("image/x-icon", Arrays.asList("ico")),
+
     APPLICATION_JSON("application/json", Arrays.asList("json")),
 
     APPLICATION_XML("application/xml", Arrays.asList("xml")),

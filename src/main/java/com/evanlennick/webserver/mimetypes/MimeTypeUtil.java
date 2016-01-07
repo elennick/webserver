@@ -15,7 +15,12 @@ public final class MimeTypeUtil {
             initMimeTypeMap();
         }
 
-        return mimeTypeMap.get(extension);
+        String mimeType = mimeTypeMap.get(extension);
+        if(null == mimeType) {
+            mimeType = "application/octet-stream";
+        }
+
+        return mimeType;
     }
 
     private static void initMimeTypeMap() {
