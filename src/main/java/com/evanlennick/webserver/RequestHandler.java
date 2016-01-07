@@ -81,7 +81,7 @@ public class RequestHandler {
 
             code = HttpResponseCode.OK;
 
-            String fileExtension = Files.getFileExtension(locationRequested);
+            String fileExtension = Files.getFileExtension(file.getAbsolutePath());
             contentType = MimeTypeUtil.getMimeTypeStringByFileExtension(fileExtension);
 
             body = new byte[(int) file.length()];
