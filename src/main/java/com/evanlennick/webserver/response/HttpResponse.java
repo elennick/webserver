@@ -4,6 +4,7 @@ import com.evanlennick.webserver.Utils;
 import com.google.common.collect.Maps;
 import com.google.common.primitives.Bytes;
 
+import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
@@ -22,7 +23,7 @@ public class HttpResponse {
 
     private byte[] body;
 
-    public HttpResponse(HttpResponseCode code, Map<String, String> headers, byte[] body) {
+    public HttpResponse(HttpResponseCode code, Map<String, String> headers, @Nullable byte[] body) {
         this.version = "HTTP/1.1";
         this.code = code;
         this.headers = headers;

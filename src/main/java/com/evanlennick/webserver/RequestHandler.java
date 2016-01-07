@@ -85,12 +85,9 @@ public class RequestHandler {
             String fileExtension = Files.getFileExtension(locationRequested);
             contentType = MimeTypeUtil.getMimeTypeStringByFileExtension(fileExtension);
 
-            String requestMethod = request.getMethod();
-            if (requestMethod.equals(HttpRequestMethod.GET.name())) {
-                body = new byte[(int) file.length()];
-                BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
-                bis.read(body, 0, body.length);
-            }
+            body = new byte[(int) file.length()];
+            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+            bis.read(body, 0, body.length);
         } catch (NullPointerException e) {
             code = HttpResponseCode.NOT_FOUND;
             contentType = MimeType.TEXT_PLAIN.getMimeTypeString();
@@ -102,6 +99,10 @@ public class RequestHandler {
 
         if (null != contentType) {
             responseBuilder.addHeader("Content-Type", contentType);
+        }
+
+        if(request.isHeadRequest()) {
+            responseBuilder.dontIncludeBody();
         }
 
         return responseBuilder.build();

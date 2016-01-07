@@ -50,6 +50,22 @@ public class HttpRequest {
         body = requestBody.toString();
     }
 
+    public boolean hasRequestMethod(HttpRequestMethod httpRequestMethod) {
+        return getMethod().equals(httpRequestMethod.name());
+    }
+
+    public boolean isGetRequest() {
+        return hasRequestMethod(HttpRequestMethod.GET);
+    }
+
+    public boolean isHeadRequest() {
+        return hasRequestMethod(HttpRequestMethod.HEAD);
+    }
+
+    public boolean isDeleteRequest() {
+        return hasRequestMethod(HttpRequestMethod.DELETE);
+    }
+
     public String getRequestLine() {
         return requestLine;
     }

@@ -12,6 +12,8 @@ public class HttpResponseBuilder {
 
     private byte[] body;
 
+    private boolean includeBody = true;
+
     public HttpResponseBuilder() {
         headers = Maps.newHashMap();
     }
@@ -32,11 +34,24 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder body(byte[] body) {
+        if(null != body) {
+            String length = Integer.toString(body.length);
+            this.addHeader("Content-Length", length);
+        }
         this.body = body;
         return this;
     }
 
+    public HttpResponseBuilder dontIncludeBody() {
+        this.includeBody = false;
+        return this;
+    }
+
     public HttpResponse build() {
-        return new HttpResponse(code, headers, body);
+        if(includeBody) {
+            return new HttpResponse(code, headers, body);
+        } else {
+            return new HttpResponse(code, headers, null);
+        }
     }
 }
