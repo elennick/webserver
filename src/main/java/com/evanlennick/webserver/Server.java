@@ -3,11 +3,14 @@ package com.evanlennick.webserver;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class Server {
+
+    private final int SOCKET_TIMEOUT_IN_SECONDS = 30;
 
     private final int port;
 
@@ -31,6 +34,7 @@ public class Server {
         }
 
         System.out.println("Listening on port " + port + "...\n");
+        final int socketTimeout = new Long(Duration.ofSeconds(SOCKET_TIMEOUT_IN_SECONDS).toMillis()).intValue();
 
         running = true;
         while (running) {
@@ -38,8 +42,9 @@ public class Server {
             synchronized (this) {
                 pool.execute(new Runnable() {
                     public void run() {
-                        RequestHandler requestHandler = new RequestHandler(socket);
                         try {
+                            socket.setSoTimeout(socketTimeout);
+                            RequestHandler requestHandler = new RequestHandler(socket);
                             requestHandler.go();
                         } catch (IOException e) {
                             System.out.println("Error encountered during request: " + e.getMessage());

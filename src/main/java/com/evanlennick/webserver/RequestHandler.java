@@ -76,6 +76,13 @@ public class RequestHandler {
             resource = classLoader.getResource(fileLocation).getFile();
             File file = new File(resource);
 
+            if (file.isDirectory()) {
+                File indexFile = new File(file, "index.html");
+                if (indexFile.exists() && !indexFile.isDirectory()) {
+                    file = indexFile;
+                }
+            }
+
             code = HttpResponseCode.OK;
 
             String fileExtension = Files.getFileExtension(resource);

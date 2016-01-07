@@ -19,7 +19,7 @@ public class Main {
                 }
             }
         };
-        runnable.run();
+        new Thread(runnable).start();
     }
 
     private static int getPort(String[] args) {
