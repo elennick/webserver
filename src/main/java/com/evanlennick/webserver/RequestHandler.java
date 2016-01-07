@@ -3,7 +3,6 @@ package com.evanlennick.webserver;
 import com.evanlennick.webserver.mimetypes.MimeType;
 import com.evanlennick.webserver.mimetypes.MimeTypeUtil;
 import com.evanlennick.webserver.request.HttpRequest;
-import com.evanlennick.webserver.request.HttpRequestMethod;
 import com.evanlennick.webserver.response.HttpResponse;
 import com.evanlennick.webserver.response.HttpResponseBuilder;
 import com.evanlennick.webserver.response.HttpResponseCode;
@@ -97,7 +96,7 @@ public class RequestHandler {
                 .addHeader("Content-Type", contentType)
                 .body(body);
 
-        if(request.isHeadRequest()) {
+        if (request.isHeadRequest()) {
             responseBuilder.dontIncludeBody();
         }
 
