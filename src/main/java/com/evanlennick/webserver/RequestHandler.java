@@ -29,10 +29,9 @@ public class RequestHandler {
 
         HttpResponse response;
         try {
-            if (request.getMethod().equals(HttpRequestMethod.GET.name())
-                    || request.getMethod().equals(HttpRequestMethod.HEAD.name())) {
+            if (request.isGetRequest() || request.isHeadRequest()) {
                 response = generateGetOrHeadResponse(request);
-            } else if (request.getMethod().equals((HttpRequestMethod.DELETE.name()))) {
+            } else if (request.isDeleteRequest()) {
                 response = generateDeleteResponse(request);
             } else {
                 throw new UnsupportedOperationException();
