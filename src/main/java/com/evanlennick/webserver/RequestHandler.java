@@ -10,6 +10,9 @@ import com.google.common.io.Files;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.UUID;
+
+import static com.evanlennick.webserver.Constants.HTTP_EOL;
 
 public class RequestHandler {
 
@@ -24,7 +27,7 @@ public class RequestHandler {
 
         String requestString = readRequest(socket);
         HttpRequest request = new HttpRequest(requestString);
-        System.out.println("request = " + request);
+        System.out.println(request);
 
         HttpResponse response;
         try {
@@ -39,16 +42,17 @@ public class RequestHandler {
             e.printStackTrace();
             response = new HttpResponseBuilder()
                     .code(HttpResponseCode.INTERNAL_SERVER_ERROR)
+                    .forRequest(request.getRequestId())
                     .build();
         }
-        System.out.println("response = " + response);
+        System.out.println(response);
         writeResponse(response);
 
         socket.close();
 
         long stop = System.currentTimeMillis();
         long elapsed = stop - start;
-        System.out.println("Request took " + elapsed + "ms\n\n");
+        System.out.println("Request " + request.getRequestId() + " took " + elapsed + "ms\n\n");
     }
 
     private String readRequest(Socket socket) throws IOException {
@@ -56,10 +60,10 @@ public class RequestHandler {
         BufferedReader reader = new BufferedReader(isr);
 
         String line = reader.readLine();
-        StringBuffer request = new StringBuffer(line + HttpResponse.HTTP_EOL);
+        StringBuffer request = new StringBuffer(line + HTTP_EOL);
         while (!line.isEmpty()) {
             line = reader.readLine();
-            request.append(line + HttpResponse.HTTP_EOL);
+            request.append(line + HTTP_EOL);
         }
 
         return request.toString();
@@ -94,6 +98,7 @@ public class RequestHandler {
         HttpResponseBuilder responseBuilder = new HttpResponseBuilder()
                 .code(code)
                 .addHeader("Content-Type", contentType)
+                .forRequest(request.getRequestId())
                 .body(body);
 
         if (request.isHeadRequest()) {
@@ -106,6 +111,7 @@ public class RequestHandler {
     private HttpResponse generateDeleteResponse(HttpRequest request) {
         return new HttpResponseBuilder()
                 .code(HttpResponseCode.ACCEPTED)
+                .forRequest(request.getRequestId())
                 .build();
     }
 

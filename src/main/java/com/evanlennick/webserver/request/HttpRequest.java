@@ -1,13 +1,19 @@
 package com.evanlennick.webserver.request;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
+import java.util.UUID;
+
+import static com.evanlennick.webserver.Constants.SYSTEM_EOL;
 
 public class HttpRequest {
+
+    private UUID requestId;
 
     private String requestLine;
 
@@ -22,6 +28,8 @@ public class HttpRequest {
     private String body;
 
     public HttpRequest(String request) throws IOException {
+        requestId = UUID.randomUUID();
+
         headers = Maps.newHashMap();
         BufferedReader reader = new BufferedReader(new StringReader(request));
 
@@ -42,12 +50,14 @@ public class HttpRequest {
         }
 
         line = reader.readLine();
-        StringBuffer requestBody = new StringBuffer(line + "\n");
-        while (null != line && !line.isEmpty()) {
-            line = reader.readLine();
-            requestBody.append(line + "\n");
+        if (null != line) {
+            StringBuffer requestBody = new StringBuffer(line + "\n");
+            while (null != line && !line.isEmpty()) {
+                line = reader.readLine();
+                requestBody.append(line + "\n");
+            }
+            body = requestBody.toString();
         }
-        body = requestBody.toString();
     }
 
     public boolean hasRequestMethod(HttpRequestMethod httpRequestMethod) {
@@ -90,14 +100,30 @@ public class HttpRequest {
         return body;
     }
 
+    public UUID getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(UUID requestId) {
+        this.requestId = requestId;
+    }
+
     @Override
     public String toString() {
-        return "HttpRequest{" +
-                "requestLine='" + requestLine + '\'' +
-                ", method='" + method + '\'' +
-                ", resource='" + resource + '\'' +
-                ", version='" + version + '\'' +
-                ", headers=" + headers +
-                '}';
+        String requestText = "REQUEST ID: " + requestId + SYSTEM_EOL;
+
+        requestText += requestLine + SYSTEM_EOL;
+
+        String headersText = "";
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            requestText += header.getKey() + ": " + header.getValue() + SYSTEM_EOL;
+        }
+        requestText += headersText + SYSTEM_EOL;
+
+        if (!Strings.isNullOrEmpty(getBody())) {
+            requestText += getBody();
+        }
+
+        return requestText;
     }
 }

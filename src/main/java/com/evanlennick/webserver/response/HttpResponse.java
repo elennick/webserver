@@ -8,10 +8,12 @@ import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
+
+import static com.evanlennick.webserver.Constants.HTTP_EOL;
+import static com.evanlennick.webserver.Constants.SYSTEM_EOL;
 
 public class HttpResponse {
-
-    public static final String HTTP_EOL = "\r\n";
 
     public static final String SERVER_STRING = "elennick-webserver";
 
@@ -22,6 +24,8 @@ public class HttpResponse {
     private Map<String, String> headers;
 
     private byte[] body;
+
+    private UUID requestId;
 
     public HttpResponse(HttpResponseCode code, Map<String, String> headers, @Nullable byte[] body) {
         this.version = "HTTP/1.1";
@@ -34,19 +38,23 @@ public class HttpResponse {
     }
 
     public byte[] getResponseAsBytes() {
-        StringBuilder header = new StringBuilder(); //todo look into stringbuilder/stringbuffer and see if this is even necessary
-        header.append(getStatusLine());
-        header.append(HTTP_EOL);
-        header.append(getHeadersInHttpFormat());
-        header.append(HTTP_EOL);
-
-        byte[] headerAsBytes = header.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] headerAsBytes = getResponseHeader().getBytes(StandardCharsets.UTF_8);
 
         if (Objects.nonNull(body)) {
             return Bytes.concat(headerAsBytes, body);
         } else {
             return headerAsBytes;
         }
+    }
+
+    public String getResponseHeader() {
+        StringBuilder header = new StringBuilder(); //todo look into stringbuilder/stringbuffer and see if this is even necessary
+        header.append(getStatusLine());
+        header.append(HTTP_EOL);
+        header.append(getHeadersInHttpFormat());
+        header.append(HTTP_EOL);
+
+        return header.toString();
     }
 
     public String getStatusLine() {
@@ -88,12 +96,19 @@ public class HttpResponse {
         this.body = body;
     }
 
+    public UUID getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(UUID requestId) {
+        this.requestId = requestId;
+    }
+
     @Override
     public String toString() {
-        return "HttpResponse{" +
-                "version='" + version + '\'' +
-                ", code=" + code +
-                ", headers=" + headers +
-                '}';
+        String requestText = "RESPONSE FOR REQUEST ID: " + requestId + SYSTEM_EOL;
+        requestText += getResponseHeader();
+
+        return requestText;
     }
 }

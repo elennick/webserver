@@ -3,6 +3,7 @@ package com.evanlennick.webserver.response;
 import com.google.common.collect.Maps;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class HttpResponseBuilder {
 
@@ -13,6 +14,8 @@ public class HttpResponseBuilder {
     private byte[] body;
 
     private boolean includeBody = true;
+
+    private UUID requestId;
 
     public HttpResponseBuilder() {
         headers = Maps.newHashMap();
@@ -47,11 +50,23 @@ public class HttpResponseBuilder {
         return this;
     }
 
+    public HttpResponseBuilder forRequest(UUID id) {
+        this.requestId = id;
+        return this;
+    }
+
     public HttpResponse build() {
+        HttpResponse response;
         if(includeBody) {
-            return new HttpResponse(code, headers, body);
+            response = new HttpResponse(code, headers, body);
         } else {
-            return new HttpResponse(code, headers, null);
+            response = new HttpResponse(code, headers, null);
         }
+
+        if(null != requestId) {
+            response.setRequestId(requestId);
+        }
+
+        return response;
     }
 }
