@@ -10,7 +10,6 @@ import com.google.common.io.Files;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.UUID;
 
 import static com.evanlennick.webserver.Constants.HTTP_EOL;
 
@@ -81,6 +80,13 @@ public class RequestHandler {
         try {
             locationRequested = classLoader.getResource(fileLocation).getFile();
             File file = determineResourceToReturn(locationRequested);
+
+            if (!file.exists() || file.isDirectory()) {
+                return new HttpResponseBuilder()
+                        .code(HttpResponseCode.NOT_FOUND)
+                        .forRequest(request.getRequestId())
+                        .build();
+            }
 
             code = HttpResponseCode.OK;
 
