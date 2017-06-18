@@ -2,8 +2,6 @@ package com.evanlennick.webserver;
 
 import java.io.IOException;
 
-import static java.lang.System.getProperty;
-
 public class Main {
 
     public static final int DEFAULT_PORT = 8180;
@@ -11,17 +9,14 @@ public class Main {
     public static void main(String[] args) {
         final int port = getPort(args);
 
-        Runnable runnable = new Runnable() {
-            public void run() {
-                Server server = new Server(port);
-                try {
-                    server.start();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        new Thread(() -> {
+            Server server = new Server(port);
+            try {
+                server.start();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        };
-        new Thread(runnable).start();
+        }).start();
     }
 
     private static int getPort(String[] args) {

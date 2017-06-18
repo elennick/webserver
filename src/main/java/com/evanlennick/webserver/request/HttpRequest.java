@@ -1,10 +1,10 @@
 package com.evanlennick.webserver.request;
 
+import com.evanlennick.webserver.exception.UnableToParseRequestException;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
 import java.util.UUID;
@@ -27,36 +27,38 @@ public class HttpRequest {
 
     private String body;
 
-    public HttpRequest(String request) throws IOException {
-        requestId = UUID.randomUUID();
+    public HttpRequest(String request) {
+        try {
+            headers = Maps.newHashMap();
+            BufferedReader reader = new BufferedReader(new StringReader(request));
 
-        headers = Maps.newHashMap();
-        BufferedReader reader = new BufferedReader(new StringReader(request));
+            String line = reader.readLine();
+            requestLine = line;
+            String[] splitRequestLine = requestLine.split(" ");
+            method = splitRequestLine[0].trim();
+            resource = splitRequestLine[1].trim();
+            version = splitRequestLine[2].trim();
 
-        String line = reader.readLine();
-        requestLine = line;
-        String[] splitRequestLine = requestLine.split(" ");
-        method = splitRequestLine[0].trim();
-        resource = splitRequestLine[1].trim();
-        version = splitRequestLine[2].trim();
-
-        line = reader.readLine();
-        while (null != line && !line.isEmpty()) {
-            String[] splitHeader = line.split(":");
-            String headerFieldName = splitHeader[0].trim();
-            String headerFieldValue = splitHeader[1].trim();
-            headers.put(headerFieldName, headerFieldValue);
             line = reader.readLine();
-        }
-
-        line = reader.readLine();
-        if (null != line) {
-            StringBuffer requestBody = new StringBuffer(line + "\n");
             while (null != line && !line.isEmpty()) {
+                String[] splitHeader = line.split(":");
+                String headerFieldName = splitHeader[0].trim();
+                String headerFieldValue = splitHeader[1].trim();
+                headers.put(headerFieldName, headerFieldValue);
                 line = reader.readLine();
-                requestBody.append(line + "\n");
             }
-            body = requestBody.toString();
+
+            line = reader.readLine();
+            if (null != line) {
+                StringBuffer requestBody = new StringBuffer(line + "\n");
+                while (null != line && !line.isEmpty()) {
+                    line = reader.readLine();
+                    requestBody.append(line + "\n");
+                }
+                body = requestBody.toString();
+            }
+        } catch (Exception e) {
+            throw new UnableToParseRequestException(e);
         }
     }
 
@@ -110,7 +112,7 @@ public class HttpRequest {
 
     @Override
     public String toString() {
-        String requestText = "REQUEST ID: " + requestId + SYSTEM_EOL;
+        String requestText = "REQUEST WITH ID: " + requestId + SYSTEM_EOL;
 
         requestText += requestLine + SYSTEM_EOL;
 

@@ -1,4 +1,4 @@
-package com.evanlennick.webserver.mimetypes;
+package com.evanlennick.webserver.mimetype;
 
 import com.google.common.collect.Maps;
 

@@ -1,4 +1,4 @@
-package com.evanlennick.webserver.mimetypes;
+package com.evanlennick.webserver.mimetype;
 
 import java.util.Arrays;
 import java.util.List;

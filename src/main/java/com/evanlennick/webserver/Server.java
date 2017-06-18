@@ -40,16 +40,14 @@ public class Server {
         while (running) {
             final Socket socket = server.accept();
             synchronized (this) {
-                pool.execute(new Runnable() {
-                    public void run() {
-                        try {
-                            socket.setSoTimeout(socketTimeout);
-                            RequestHandler requestHandler = new RequestHandler(socket);
-                            requestHandler.go();
-                        } catch (IOException e) {
-                            System.out.println("Error encountered during request: " + e.getMessage());
-                            e.printStackTrace();
-                        }
+                pool.execute(() -> {
+                    try {
+                        socket.setSoTimeout(socketTimeout);
+                        RequestHandler requestHandler = new RequestHandler(socket);
+                        requestHandler.go();
+                    } catch (IOException e) {
+                        System.out.println("Error encountered during request: " + e.getMessage());
+                        e.printStackTrace();
                     }
                 });
             }

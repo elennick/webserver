@@ -1,7 +1,10 @@
 package com.evanlennick.webserver;
 
-import com.evanlennick.webserver.mimetypes.MimeType;
-import com.evanlennick.webserver.mimetypes.MimeTypeUtil;
+import com.evanlennick.webserver.exception.NotFoundException;
+import com.evanlennick.webserver.exception.NotImplementedException;
+import com.evanlennick.webserver.exception.UnableToParseRequestException;
+import com.evanlennick.webserver.mimetype.MimeType;
+import com.evanlennick.webserver.mimetype.MimeTypeUtil;
 import com.evanlennick.webserver.request.HttpRequest;
 import com.evanlennick.webserver.response.HttpResponse;
 import com.evanlennick.webserver.response.HttpResponseBuilder;
@@ -10,6 +13,7 @@ import com.google.common.io.Files;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.UUID;
 
 import static com.evanlennick.webserver.Constants.HTTP_EOL;
 
@@ -23,27 +27,42 @@ public class RequestHandler {
 
     public void go() throws IOException {
         long start = System.currentTimeMillis();
+        UUID requestId = UUID.randomUUID();
 
-        String requestString = readRequest(socket);
-        HttpRequest request = new HttpRequest(requestString);
-        System.out.println(request);
+        System.out.println("NEW INCOMING REQUEST, ASSIGNING ID: " + requestId);
 
-        HttpResponse response;
+        HttpRequest request;
+        HttpResponseBuilder responseBuilder;
         try {
+            String requestString = readRequest(socket);
+            request = new HttpRequest(requestString);
+            request.setRequestId(requestId);
+            System.out.println(request);
+
             if (request.isGetRequest() || request.isHeadRequest()) {
-                response = generateGetOrHeadResponse(request);
-            } else if (request.isDeleteRequest()) {
-                response = generateDeleteResponse(request);
+                responseBuilder = generateGetOrHeadResponse(request);
             } else {
-                throw new UnsupportedOperationException();
+                throw new NotImplementedException();
             }
+        } catch (NotImplementedException nie) {
+            responseBuilder = new HttpResponseBuilder()
+                    .code(HttpResponseCode.NOT_IMPLEMENTED);
+        } catch (NotFoundException nfe) {
+            responseBuilder = new HttpResponseBuilder()
+                    .code(HttpResponseCode.NOT_FOUND);
+        } catch (UnableToParseRequestException utpre) {
+            responseBuilder = new HttpResponseBuilder()
+                    .code(HttpResponseCode.BAD_REQUEST);
         } catch (Exception e) {
             e.printStackTrace();
-            response = new HttpResponseBuilder()
-                    .code(HttpResponseCode.INTERNAL_SERVER_ERROR)
-                    .forRequest(request.getRequestId())
-                    .build();
+            responseBuilder = new HttpResponseBuilder()
+                    .code(HttpResponseCode.INTERNAL_SERVER_ERROR);
         }
+
+        HttpResponse response = responseBuilder
+                .forRequest(requestId)
+                .build();
+
         System.out.println(response);
         writeResponse(response);
 
@@ -51,7 +70,7 @@ public class RequestHandler {
 
         long stop = System.currentTimeMillis();
         long elapsed = stop - start;
-        System.out.println("Request " + request.getRequestId() + " took " + elapsed + "ms\n\n");
+        System.out.println("Request " + requestId + " took " + elapsed + "ms\n\n");
     }
 
     private String readRequest(Socket socket) throws IOException {
@@ -60,15 +79,15 @@ public class RequestHandler {
 
         String line = reader.readLine();
         StringBuffer request = new StringBuffer(line + HTTP_EOL);
-        while (!line.isEmpty()) {
+        while (null != line && !line.isEmpty()) {
             line = reader.readLine();
-            request.append(line + HTTP_EOL);
+            request.append(line).append(HTTP_EOL);
         }
 
         return request.toString();
     }
 
-    private HttpResponse generateGetOrHeadResponse(HttpRequest request) throws IOException {
+    private HttpResponseBuilder generateGetOrHeadResponse(HttpRequest request) throws IOException {
         String fileLocation = "www/" + request.getResource();
 
         ClassLoader classLoader = getClass().getClassLoader();
@@ -82,10 +101,7 @@ public class RequestHandler {
             File file = determineResourceToReturn(locationRequested);
 
             if (!file.exists() || file.isDirectory()) {
-                return new HttpResponseBuilder()
-                        .code(HttpResponseCode.NOT_FOUND)
-                        .forRequest(request.getRequestId())
-                        .build();
+                throw new NotFoundException();
             }
 
             code = HttpResponseCode.OK;
@@ -111,14 +127,7 @@ public class RequestHandler {
             responseBuilder.dontIncludeBody();
         }
 
-        return responseBuilder.build();
-    }
-
-    private HttpResponse generateDeleteResponse(HttpRequest request) {
-        return new HttpResponseBuilder()
-                .code(HttpResponseCode.ACCEPTED)
-                .forRequest(request.getRequestId())
-                .build();
+        return responseBuilder;
     }
 
     private File determineResourceToReturn(String locationRequested) {
