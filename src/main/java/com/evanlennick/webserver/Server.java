@@ -8,9 +8,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class Server {
+import static com.evanlennick.webserver.Configuration.NUM_OF_REQUEST_THREADS;
+import static com.evanlennick.webserver.Configuration.SOCKET_TIMEOUT_IN_SECONDS;
 
-    private final int SOCKET_TIMEOUT_IN_SECONDS = 30;
+public class Server {
 
     private final int port;
 
@@ -26,7 +27,7 @@ public class Server {
         ServerSocket server;
         try {
             server = new ServerSocket(port);
-            pool = Executors.newFixedThreadPool(10);
+            pool = Executors.newFixedThreadPool(NUM_OF_REQUEST_THREADS);
         } catch (IOException e) {
             System.out.println("Error encountered while starting up server: " + e.getMessage());
             e.printStackTrace();

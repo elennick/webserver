@@ -2,9 +2,9 @@ package com.evanlennick.webserver;
 
 import java.io.IOException;
 
-public class Main {
+import static com.evanlennick.webserver.Configuration.DEFAULT_PORT;
 
-    public static final int DEFAULT_PORT = 8180;
+public class Main {
 
     public static void main(String[] args) {
         final int port = getPort(args);

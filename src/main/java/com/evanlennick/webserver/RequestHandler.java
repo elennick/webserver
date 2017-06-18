@@ -44,13 +44,13 @@ public class RequestHandler {
             } else {
                 throw new NotImplementedException();
             }
-        } catch (NotImplementedException nie) {
+        } catch (NotImplementedException e) {
             responseBuilder = new HttpResponseBuilder()
                     .code(HttpResponseCode.NOT_IMPLEMENTED);
-        } catch (NotFoundException nfe) {
+        } catch (NotFoundException e) {
             responseBuilder = new HttpResponseBuilder()
                     .code(HttpResponseCode.NOT_FOUND);
-        } catch (UnableToParseRequestException utpre) {
+        } catch (UnableToParseRequestException e) {
             responseBuilder = new HttpResponseBuilder()
                     .code(HttpResponseCode.BAD_REQUEST);
         } catch (Exception e) {

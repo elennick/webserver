@@ -10,13 +10,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.evanlennick.webserver.Constants.HTTP_EOL;
-import static com.evanlennick.webserver.Constants.SYSTEM_EOL;
+import static com.evanlennick.webserver.Constants.*;
 
 public class HttpResponse {
-
-    public static final String SERVER_STRING = "elennick-webserver";
-
     private String version;
 
     private HttpResponseCode code;
