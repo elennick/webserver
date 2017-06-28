@@ -1,6 +1,6 @@
-package com.evanlennick.webserver.request;
+package com.evanlennick.webserver.request
 
-public enum HttpRequestMethod {
+enum class HttpRequestMethod {
 
     GET,
 
