@@ -15,9 +15,10 @@ class Server(private val port: Int) {
 
     private var running: Boolean = false
 
+    lateinit var server: ServerSocket
+
     @Throws(IOException::class)
     fun start() {
-        val server: ServerSocket
         try {
             server = ServerSocket(port)
         } catch (e: IOException) {
@@ -47,6 +48,12 @@ class Server(private val port: Int) {
         }
 
         shutdownAndAwaitTermination(pool)
+    }
+
+    fun stop() {
+        println("Stopping server...")
+        running = false
+        server.close()
     }
 
     private fun shutdownAndAwaitTermination(pool: ExecutorService) {

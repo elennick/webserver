@@ -6,17 +6,23 @@ import com.evanlennick.webserver.Configuration.DEFAULT_PORT
 
 object Main {
 
+    lateinit var server: Server
+
     @JvmStatic fun main(args: Array<String>) {
         val port = getPort(args)
 
         Thread {
-            val server = Server(port)
+            server = Server(port)
             try {
                 server.start()
             } catch (e: IOException) {
                 e.printStackTrace()
             }
         }.start()
+    }
+
+    @JvmStatic fun stop() {
+        server.stop()
     }
 
     private fun getPort(args: Array<String>): Int {

@@ -13,6 +13,8 @@ import com.evanlennick.webserver.response.HttpResponseCode
 import com.google.common.io.Files
 import java.io.*
 import java.net.Socket
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 
 class RequestHandler(private val socket: Socket) {
@@ -22,7 +24,8 @@ class RequestHandler(private val socket: Socket) {
         val start = System.currentTimeMillis()
         val requestId = UUID.randomUUID()
 
-        println("NEW INCOMING REQUEST, ASSIGNING ID: " + requestId)
+        val timestamp = LocalDateTime.now().toString()
+        println("[$timestamp] NEW INCOMING REQUEST, ASSIGNING ID: $requestId")
 
         val request: HttpRequest
         var responseBuilder: HttpResponseBuilder
