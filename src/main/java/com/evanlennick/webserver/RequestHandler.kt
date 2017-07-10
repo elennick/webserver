@@ -86,17 +86,17 @@ class RequestHandler(private val socket: Socket) {
 
     @Throws(IOException::class)
     private fun generateGetOrHeadResponse(request: HttpRequest): HttpResponseBuilder {
-        val fileLocation = "www/" + request.resource
+        val fileLocation = "www" + request.resource
 
-        val classLoader = javaClass.classLoader
-        val locationRequested: String
         var body: ByteArray? = null
         var code: HttpResponseCode
         var contentType: String
 
         try {
-            locationRequested = classLoader.getResource(fileLocation)!!.file
-            val file = determineResourceToReturn(locationRequested)
+            println("Attempting to read file at location $fileLocation")
+
+            val file = determineResourceToReturn(fileLocation)
+            println(file.absolutePath)
 
             if (!file.exists() || file.isDirectory) {
                 throw NotFoundException()
