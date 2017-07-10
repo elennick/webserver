@@ -15,7 +15,7 @@ class WebserverTest {
     companion object {
         @JvmStatic
         @BeforeClass fun startServer() {
-            Main.main(arrayOf("80"))
+            Main.main(arrayOf("3353"))
         }
 
         @JvmStatic
@@ -29,7 +29,7 @@ class WebserverTest {
     }
 
     @Test fun test200Ok() {
-        val method = GetMethod("http://localhost/index.html")
+        val method = GetMethod("http://localhost:3353/index.html")
         val statusCode = client.executeMethod(method)
         method.releaseConnection()
 
@@ -37,7 +37,7 @@ class WebserverTest {
     }
 
     @Test fun test404NotFound() {
-        val method = GetMethod("http://localhost/doesntexist.html")
+        val method = GetMethod("http://localhost:3353/doesntexist.html")
         val statusCode = client.executeMethod(method)
         method.releaseConnection()
 
@@ -45,7 +45,7 @@ class WebserverTest {
     }
 
     @Test fun test501NotImplemented() {
-        val method = PostMethod("http://localhost/whatever.html")
+        val method = PostMethod("http://localhost:3353/whatever.html")
         val statusCode = client.executeMethod(method)
         method.releaseConnection()
 
