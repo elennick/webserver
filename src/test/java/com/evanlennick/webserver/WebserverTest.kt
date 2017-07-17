@@ -16,6 +16,7 @@ class WebserverTest {
         @JvmStatic
         @BeforeClass fun startServer() {
             Main.main(arrayOf("3353"))
+            Main.isTestMode = true
         }
 
         @JvmStatic
@@ -32,9 +33,8 @@ class WebserverTest {
         method.releaseConnection()
     }
 
-    @Ignore //TODO temporarily disable this until i set something up to have a test file available to serve
     @Test fun test200Ok() {
-        method = GetMethod("http://localhost:3353/index.html")
+        method = GetMethod("http://localhost:3353/test.html")
         val statusCode = client.executeMethod(method)
 
         assertThat(statusCode).isEqualTo(200)

@@ -13,7 +13,6 @@ import com.evanlennick.webserver.response.HttpResponseCode
 import com.google.common.io.Files
 import java.io.*
 import java.net.Socket
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -86,16 +85,22 @@ class RequestHandler(private val socket: Socket) {
 
     @Throws(IOException::class)
     private fun generateGetOrHeadResponse(request: HttpRequest): HttpResponseBuilder {
-        val fileLocation = "www" + request.resource
-
         var body: ByteArray? = null
         var code: HttpResponseCode
         var contentType: String
 
         try {
-            println("Attempting to read file at location $fileLocation")
+            var file: File
 
-            val file = determineResourceToReturn(fileLocation)
+            if (Main.isTestMode) {
+                file = File("src/test/resources" + request.resource)
+                println("Attempting to read file at location ${file.absolutePath}")
+            } else {
+                val fileLocation = "www" + request.resource
+                println("Attempting to read file at location $fileLocation")
+                file = determineResourceToReturn(fileLocation)
+            }
+
             println(file.absolutePath)
 
             if (!file.exists() || file.isDirectory) {

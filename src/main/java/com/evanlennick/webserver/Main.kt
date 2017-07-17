@@ -8,6 +8,8 @@ object Main {
 
     lateinit var server: Server
 
+    var isTestMode: Boolean = false
+
     @JvmStatic fun main(args: Array<String>) {
         val port = getPort(args)
 
