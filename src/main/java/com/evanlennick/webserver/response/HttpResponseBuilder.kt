@@ -1,14 +1,16 @@
 package com.evanlennick.webserver.response
 
-import com.google.common.collect.Maps
-import java.util.UUID
+import java.io.ByteArrayOutputStream
+import java.util.*
+import java.util.zip.GZIPOutputStream
+
 
 //todo get rid of this and just used default/named arguments in HttpResponse object
 class HttpResponseBuilder {
 
     private var code: HttpResponseCode? = null
 
-    private var headers: MutableMap<String, String>? = null
+    private var headers: MutableMap<String, String> = mutableMapOf()
 
     private var body: ByteArray? = null
 
@@ -16,9 +18,7 @@ class HttpResponseBuilder {
 
     private var requestId: UUID? = null
 
-    init {
-        headers = Maps.newHashMap<String, String>()
-    }
+    private var gzipBody: Boolean = false
 
     fun code(code: HttpResponseCode): HttpResponseBuilder {
         this.code = code
@@ -36,11 +36,12 @@ class HttpResponseBuilder {
     }
 
     fun body(body: ByteArray?): HttpResponseBuilder {
-        if (null != body) {
-            val length = Integer.toString(body.size)
-            this.addHeader("Content-Length", length)
-        }
         this.body = body
+        return this
+    }
+
+    fun gzipBody(): HttpResponseBuilder {
+        this.gzipBody = true
         return this
     }
 
@@ -56,8 +57,18 @@ class HttpResponseBuilder {
 
     fun build(): HttpResponse {
         val response: HttpResponse
-        if (includeBody) {
-            response = HttpResponse(code!!, headers, body)
+        if (includeBody && null != body) {
+            if (gzipBody) {
+                val compressedBody = compressResponseBody(body)
+                val length = Integer.toString(compressedBody.size)
+                this.addHeader("Content-Length", length)
+                this.addHeader("Content-Encoding", "gzip")
+                response = HttpResponse(code!!, headers, compressedBody)
+            } else {
+                val length = Integer.toString(body!!.size)
+                this.addHeader("Content-Length", length)
+                response = HttpResponse(code!!, headers, body)
+            }
         } else {
             response = HttpResponse(code!!, headers, null)
         }
@@ -67,5 +78,15 @@ class HttpResponseBuilder {
         }
 
         return response
+    }
+
+    private fun compressResponseBody(uncompressedBody: ByteArray?): ByteArray {
+        val baos = ByteArrayOutputStream()
+
+        val zos = GZIPOutputStream(baos)
+        zos.write(uncompressedBody)
+        zos.close()
+
+        return baos.toByteArray()
     }
 }

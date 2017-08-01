@@ -15,7 +15,6 @@ class HttpResponse(private val code: HttpResponseCode, private var headers: Muta
     var requestId: UUID? = null
 
     init {
-
         addHeader("Date", Utils.rfc1123FormattedDateTime)
         addHeader("Server", SERVER_STRING)
     }

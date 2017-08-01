@@ -128,6 +128,11 @@ class RequestHandler(private val socket: Socket) {
 
         if (request.isHeadRequest) {
             responseBuilder.dontIncludeBody()
+        } else {
+            val acceptEncoding = request.getHeaders()["Accept-Encoding"]
+            if (null != acceptEncoding && acceptEncoding.contains("gzip")) {
+                responseBuilder.gzipBody()
+            }
         }
 
         return responseBuilder
