@@ -1,32 +1,29 @@
 package com.evanlennick.webserver.integrationtests
 
 import com.evanlennick.webserver.WebserverIntegrationTestBase
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpPost
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
+import java.net.HttpURLConnection
+import java.net.URL
 
 class ResponseCodesTest : WebserverIntegrationTestBase() {
 
     @Test fun test200Ok() {
-        val request = HttpGet(baseUrl + "test.html")
-        val response = client.execute(request)
-
-        assertThat(response.statusLine.statusCode).isEqualTo(200)
+        con.requestMethod = "GET"
+        assertThat(con.responseCode).isEqualTo(200)
     }
 
     @Test fun test404NotFound() {
-        val request = HttpGet(baseUrl + "doesntexist.html")
-        val response = client.execute(request)
+        val doesntExistHtmlUrl = URL(baseUrl + "doesntexist.html")
+        val doesntExistCon = doesntExistHtmlUrl.openConnection() as HttpURLConnection
+        doesntExistCon.requestMethod = "GET"
 
-        assertThat(response.statusLine.statusCode).isEqualTo(404)
+        assertThat(doesntExistCon.responseCode).isEqualTo(404)
     }
 
     @Test fun test501NotImplemented() {
-        val request = HttpPost(baseUrl + "post.html")
-        val response = client.execute(request)
-
-        assertThat(response.statusLine.statusCode).isEqualTo(501)
+        con.requestMethod = "POST"
+        assertThat(con.responseCode).isEqualTo(501)
     }
 
 }
